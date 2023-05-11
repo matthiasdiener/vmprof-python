@@ -122,6 +122,7 @@ PY_THREAD_STATE_T * _get_pystate_for_this_thread(void) {
     // see issue 116 on github.com/vmprof/vmprof-python.
     // PyGILState_GetThisThreadState(); can hang forever
     //
+    return PyGILState_GetThisThreadState();
     PyInterpreterState * istate;
     PyThreadState * state;
     long mythread_id;
@@ -479,6 +480,9 @@ int vmprof_register_virtual_function(char *code_name, intptr_t code_uid,
 
 int get_stack_trace(PY_THREAD_STATE_T * current, void** result, int max_depth, intptr_t pc)
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     PY_STACK_FRAME_T * frame;
 #ifdef RPYTHON_VMPROF
     // do nothing here,
@@ -488,6 +492,7 @@ int get_stack_trace(PY_THREAD_STATE_T * current, void** result, int max_depth, i
 #if DEBUG
         fprintf(stderr, "WARNING: get_stack_trace, current is NULL\n");
 #endif
+        PyGILState_Release(gstate);
         return 0;
     }
     frame = _PyThreadState_GetFrameBorrow(current);
@@ -496,7 +501,10 @@ int get_stack_trace(PY_THREAD_STATE_T * current, void** result, int max_depth, i
 #if DEBUG
         fprintf(stderr, "WARNING: get_stack_trace, frame is NULL\n");
 #endif
+        PyGILState_Release(gstate);
         return 0;
     }
-    return vmp_walk_and_record_stack(frame, result, max_depth, 1, pc);
+    int r = vmp_walk_and_record_stack(frame, result, max_depth, 1, pc);
+    PyGILState_Release(gstate);
+    return r;
 }
