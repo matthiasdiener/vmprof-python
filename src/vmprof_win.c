@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 #include "vmprof_win.h"
 
 volatile int thread_started = 0;
@@ -90,7 +92,7 @@ int vmprof_snapshot_thread(DWORD thread_id, PY_WIN_THREAD_STATE *tstate, prof_st
     ResumeThread(hThread);
     return depth;
 #else
-    depth = vmp_walk_and_record_stack(tstate->frame, stack->stack,
+    depth = vmp_walk_and_record_stack(_PyThreadState_GetFrameBorrow(tstate), stack->stack,
                                       MAX_STACK_DEPTH, 0, 0);
     stack->depth = depth;
     stack->stack[depth++] = (void*)((ULONG_PTR)thread_id);

@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 /**
  * This file is the CPython module _vmprof. It does not share code
  * with PyPy. PyPy's _vmprof module is included in the main repo.
@@ -152,8 +154,8 @@ void emit_all_code_objects(PyObject * seen_code_ids)
     size = PyList_GET_SIZE(lst);
     for (i = 0; i < size; i++) {
         PyObject *o = PyList_GET_ITEM(lst, i);
-        if (o->ob_type->tp_traverse &&
-            o->ob_type->tp_traverse(o, _look_for_code_object, (void*)param)
+        if (Py_TYPE(o)->tp_traverse &&
+            Py_TYPE(o)->tp_traverse(o, _look_for_code_object, (void*)param)
                 < 0)
             goto error;
     }
@@ -298,7 +300,7 @@ sample_stack_now(PyObject *module, PyObject * args)
         vmprof_ignore_signals(0);
         return NULL;
     }
-    entry_count = vmp_walk_and_record_stack(tstate->frame, m, SINGLE_BUF_SIZE/sizeof(void*)-1, (int)skip, 0);
+    entry_count = vmp_walk_and_record_stack(_PyThreadState_GetFrameBorrow(tstate), m, SINGLE_BUF_SIZE/sizeof(void*)-1, (int)skip, 0);
 
     for (i = 0; i < entry_count; i++) {
         routine_ip = m[i];
@@ -308,8 +310,7 @@ sample_stack_now(PyObject *module, PyObject * args)
     free(m);
 
     vmprof_ignore_signals(0);
-    Py_INCREF(list);
-    return list;
+    return Py_NewRef(list);
 
 error:
     vmprof_ignore_signals(0);

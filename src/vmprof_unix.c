@@ -1,3 +1,5 @@
+#include "pythoncapi_compat.h"
+
 #include "vmprof_unix.h"
 
 #ifdef VMPROF_UNIX
@@ -488,7 +490,7 @@ int get_stack_trace(PY_THREAD_STATE_T * current, void** result, int max_depth, i
 #endif
         return 0;
     }
-    frame = current->frame;
+    frame = _PyThreadState_GetFrameBorrow(current);
 #endif
     if (frame == NULL) {
 #if DEBUG
