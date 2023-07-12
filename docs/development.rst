@@ -88,6 +88,6 @@ Integration Tests
 
 This is a very important test suite to ensure that all packages work together. It is automatically run every day by travis. You can run them locally. If you happen not to run a Debian base distribution, you can provide the following shell variable to prevent the tests from downloading a Debian PyPy::
 
-    $ TEST_PYPY_EXEC=/path/to/pypy py.test testvmprof/
+    $ TEST_PYPY_EXEC=/path/to/pypy pytest testvmprof/
 
 

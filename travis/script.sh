@@ -11,8 +11,8 @@ if [[ "$(uname -m)" == 'ppc64le' ]]; then
     EXTRA_OPTS='-k not test_basic and not test_read_bit_by_bit and not test_enable_disable and not test_start_end_time and not test_nested_call and not test_line_profiling and not test_vmprof_show'
 fi
 
-py.test vmprof/ -vrs "$EXTRA_OPTS"
-py.test jitlog/ -vrs
+pytest vmprof/ -vrs "$EXTRA_OPTS"
+pytest jitlog/ -vrs
 
 if [[ -n "$TRAVIS_TAG" ]]; then
 
